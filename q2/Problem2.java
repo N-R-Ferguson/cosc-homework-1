@@ -49,7 +49,43 @@ public class Problem2 {
         NEEDS TO BE WRITTEN
     */
     private void solve(){
+        
+        LinkedList<Board> openList = new LinkedList<Board>();
+        LinkedList<Board> closedList = new LinkedList<Board>();
 
+        openList.addFirst(initial);
+
+        while(!openList.isEmpty()){
+
+            int best = selectBest(openList);
+
+            Board board = openList.remove(best);
+
+            closedList.addLast(board);
+
+            if(goal(board)){
+                displayPath(board);
+                return;
+            }else{
+                LinkedList<Board> children = generate(board);
+
+                for(int i = 0; i < children.size(); i++){
+                    Board child = children.get(i);
+
+                    if(!exists(child, closedList)){
+                        if(!exists(child, openList)){
+                            openList.addLast(child);
+                        }else{
+                            int index = find(child, openList);
+                            if(child.fvalue < openList.get(index).fvalue){
+                                openList.remove(index);
+                                openList.addLast(child);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
 
@@ -101,7 +137,7 @@ public class Problem2 {
         return identical(board, goal);
     }
 
-    private boolean exits(Board board, LinkedList<Board> list){
+    private boolean exists(Board board, LinkedList<Board> list){
         for(Board element: list)
             if(identical(board, element)) return true;
         return false;
