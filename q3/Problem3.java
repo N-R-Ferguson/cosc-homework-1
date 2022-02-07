@@ -1,12 +1,13 @@
 import java.util.LinkedList;
-public class Tictactoe{
+import java.util.Scanner;
+public class Problem3{
 
     private final char EMPTY = ' ';
     private final char COMPUTER = 'X';
     private final char PLAYER = '0';
     private final int MIN = 0;
     private final int MAX = 1;
-    private final int limit = 3;
+    private final int LIMIT = 3;
     private int COMPUTER_points = 0;
     private int PLAYER_points = 0;
 
@@ -20,19 +21,59 @@ public class Tictactoe{
             for(int i = 0; i < size; i++)
                 for(int j = 0; j < size; j++)
                     array[i][j] = EMPTY;
-            COMPUTER_points = 0;
-            PLAYER_points = 0;
-            
+
+
+
+        }
+    }
+
+    private class Player{
+        private int twoConsecutives;
+        private int threeConsecutives;
+        private int points;
+
+        private Player(){
+            this.twoConsecutives = 0;
+            this.threeConsecutives = 0;
+            this.points = 0;
+        }
+
+        private int calculateScore(){
+            //System.out.println(twoConsecutives);
+            this.points = 2 * this.twoConsecutives + 3 * this.threeConsecutives;
+            return this.points;
+        }
+    }
+
+    private class Computer{
+        private int twoConsecutives;
+        private int threeConsecutives;
+        private int points;
+
+        private Computer(){
+            this.twoConsecutives = 0;
+            this.threeConsecutives = 0;
+            this.points = 0;
+        }
+
+        private int calculateScore(){
+            //System.out.println(twoConsecutives);
+            this.points = 2 * this.twoConsecutives + 3 * this.threeConsecutives;
+            return this.points;
         }
     }
 
     private Board board;
     private int size;
+    private Computer computer;
+    private Player player; // human player
 
     public Problem3(int sz){
 
         this.size = sz;
         this.board = new Board(size);
+        this.computer = new Computer();
+        this.player = new Player();
         displayBoard(board);
     }
 
@@ -78,6 +119,14 @@ public class Tictactoe{
 
         board.array[i][j] = PLAYER;                //place player symbol
 
+        for(int a = 0; a < size; a++){
+            checkRow(board, a, 'X');
+            checkColumn(board, a, 'X');
+            checkRow(board, a, '0');
+            checkColumn(board, a, '0');
+        }
+        System.out.println(player.calculateScore());
+        System.out.println(computer.calculateScore());
         displayBoard(board);                       //diplay board
 
         return board;
@@ -100,15 +149,22 @@ public class Tictactoe{
         }
 
         Board result = children.get(maxIndex);     //choose the child as next move
-                                                   
+                                              
+        for(int i = 0; i < size; i++){
+            checkRow(board, i, 'X');
+            checkColumn(board, i, 'X');
+            checkRow(board, i, '0');
+            checkColumn(board, i, '0');
+        }
         System.out.println("Computer move:"); 
-
+        System.out.println(player.calculateScore());
+        System.out.println(computer.calculateScore());
         displayBoard(result);                      //print next move
 
         return result;               
     }
     
-    private int minmax(Board board, int level){
+    private int minmax(Board board, int level, int depth){
         if (computerWin(board) || playerWin(board) || draw(board) || depth >= LIMIT)
             return evaluate(board);                //if board is terminal or depth limit is reached
         else                                       //evaluate board
@@ -149,14 +205,14 @@ public class Tictactoe{
     }
 
     private LinkedList<Board> generate(Board board, char symbol){
-        LinkedList<Board> generate = new LinkedList<Board>();
+        LinkedList<Board> children = new LinkedList<Board>();
 
         for(int i = 0; i <size; i++)
-            for(int j = 0; j <size; J++)
-                if(boared.array[i][j] == EMPTY){
+            for(int j = 0; j <size; j++)
+                if(board.array[i][j] == EMPTY){
                     Board child = copy(board);
                     child.array[i][j] = symbol;
-                    children.generate(child);
+                    children.addLast(child);
                 }
             
 
@@ -176,26 +232,87 @@ public class Tictactoe{
     }
 
     private boolean check(Board board, char symbol){ //checks to see who has more points
-        if(full(board) && board.COMPUTER_points > board.PLAYER_points) return true;
-        if(full(board) && board.PLAYER_points > board.COMPUTER_points) return true;
+        player.twoConsecutives = 0;
+        player.threeConsecutives = 0;
+        computer.twoConsecutives = 0;
+        computer.threeConsecutives = 0;
+        
+        if(full(board) && computer.calculateScore() > player.calculateScore()) return true;
+        if(full(board) && player.calculateScore() > computer.calculateScore()) return true;
 
         return false;
     }
 
     //MODIFY THE CHECKS FOR FINDING CONSECUTIVE SYMBOLS
-    private boolean checkRow(Board board, int i, char symbol){
-        for(int j = 0; j < size; j++)
-            if(board.arry[i][j] == symbol) 
-                return false;
-        return true;
+    private void checkRow(Board board, int i, char symbol){
+        int consecutiveSymbolCount = 0;
+        for(int j = 0; j < size; j++){
+            if(board.array[i][j] != symbol) 
+                break;
+            consecutiveSymbolCount++;
+           
+        }
+        if(consecutiveSymbolCount == 2){
+            if(symbol == 'X')
+                computer.twoConsecutives++;
+            else
+                player.twoConsecutives++;
+        }else if(consecutiveSymbolCount == 3){
+            if(symbol == 'X'){
+                computer.twoConsecutives += 2;
+                computer.threeConsecutives++;
+            }
+            else{
+                player.twoConsecutives += 2;
+                player.threeConsecutives++;
+            }
+        }else if(consecutiveSymbolCount > 3){
+            if(symbol == 'X'){
+                computer.twoConsecutives = consecutiveSymbolCount - 1;
+                computer.threeConsecutives = consecutiveSymbolCount - 2;
+            }else{
+                player.twoConsecutives = consecutiveSymbolCount - 1;
+                player.threeConsecutives = consecutiveSymbolCount - 2;
+
+            }
+
+        }
     }
 
-    private boolean checkcolumn(Board board, int i, char symbol){
-        for(int j = 0; j < size; j++)
+    private void checkColumn(Board board, int i, char symbol){
+        int consecutiveSymbolCount = 0;
+        for(int j = 0; j < size; j++){
             if(board.array[j][i] != symbol) 
-            return false;
-        return true;
+                break;
+            consecutiveSymbolCount++;
+            System.out.println(consecutiveSymbolCount);
+        }
+        if(consecutiveSymbolCount == 2){
+            if(symbol == 'X')
+                computer.twoConsecutives++;
+            else
+                player.twoConsecutives++;
+        }else if(consecutiveSymbolCount == 3){
+            if(symbol == 'X'){
+                computer.twoConsecutives += 2;
+                computer.threeConsecutives++;
+            }
+            else{
+                player.twoConsecutives += 2;
+                player.threeConsecutives++;
+            }
+        }else if(consecutiveSymbolCount > 3){
+            if(symbol == 'X'){
+                computer.twoConsecutives = consecutiveSymbolCount - 1;
+                computer.threeConsecutives = consecutiveSymbolCount - 2;
+            }else{
+                player.twoConsecutives = consecutiveSymbolCount - 1;
+                player.threeConsecutives = consecutiveSymbolCount - 2;
+
+            }
+        }
     }
+
 
     private boolean full(Board board){
         for(int i = 0; i < size; i++)
@@ -230,4 +347,16 @@ public class Tictactoe{
         }
         System.out.println();
     }
+
+    private int evaluate(Board board)
+    {
+        if (computerWin(board))                    //utility is 4 if computer wins
+            return 4;
+        else if (playerWin(board))                 //utility is 1 if player wins
+            return 1;
+        else if (draw(board))                      //utility is 3 if draw
+            return 3;
+        else                                       //utility is 2 if depth limit is reached
+            return 2;
+    } 
 }

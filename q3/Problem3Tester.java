@@ -6,7 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.Buffer;
 
-public class TictactoeTester {
+public class Problem3Tester {
     public static void main(String [] args){
         Scanner input = new Scanner(System.in);
         String inputFilename = "", outputFilename = "", line = "", finalString="";
@@ -33,6 +33,6 @@ public class TictactoeTester {
         }
 
         Problem3 p = new Problem3(boardSize);
-        
+        p.play();
     }
 }
