@@ -32,7 +32,7 @@ public class TictactoeTester {
             System.out.println("And error occured" + e);
         }
 
-        Tictactoe t = new Tictactoe(boardSize);
+        Problem3 p = new Problem3(boardSize);
         
     }
 }

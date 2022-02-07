@@ -7,6 +7,8 @@ public class Tictactoe{
     private final int MIN = 0;
     private final int MAX = 1;
     private final int limit = 3;
+    private int COMPUTER_points = 0;
+    private int PLAYER_points = 0;
 
     private class Board{
 
@@ -18,7 +20,8 @@ public class Tictactoe{
             for(int i = 0; i < size; i++)
                 for(int j = 0; j < size; j++)
                     array[i][j] = EMPTY;
-
+            COMPUTER_points = 0;
+            PLAYER_points = 0;
             
         }
     }
@@ -26,7 +29,7 @@ public class Tictactoe{
     private Board board;
     private int size;
 
-    public Tictactoe(int sz){
+    public Problem3(int sz){
 
         this.size = sz;
         this.board = new Board(size);
@@ -107,42 +110,42 @@ public class Tictactoe{
     
     private int minmax(Board board, int level){
         if (computerWin(board) || playerWin(board) || draw(board) || depth >= LIMIT)
-        return evaluate(board);                //if board is terminal or depth limit is reached
-    else                                       //evaluate board
-    {
-        if (level == MAX)                      //if board is at max level     
+            return evaluate(board);                //if board is terminal or depth limit is reached
+        else                                       //evaluate board
         {
-             LinkedList<Board> children = generate(board, COMPUTER);
-                                               //generate children of board
-             int maxValue = Integer.MIN_VALUE;
-                                               //find maximum of minmax value of children
-             for (int i = 0; i < children.size(); i++)
-             {                
-                 int currentValue = minmax(children.get(i), MIN, depth+1);
+            if (level == MAX)                      //if board is at max level     
+            {
+                LinkedList<Board> children = generate(board, COMPUTER);
+                                                //generate children of board
+                int maxValue = Integer.MIN_VALUE;
+                                                //find maximum of minmax value of children
+                for (int i = 0; i < children.size(); i++)
+                {                
+                    int currentValue = minmax(children.get(i), MIN, depth+1);
 
-                 if (currentValue > maxValue)
-                      maxValue = currentValue;
-             }
+                    if (currentValue > maxValue)
+                        maxValue = currentValue;
+                }
 
-             return maxValue;                  //return maximum minmax value             
+                return maxValue;                  //return maximum minmax value             
+            }
+            else                                   //if board is at min level
+            {                     
+                LinkedList<Board> children = generate(board, PLAYER);
+                                                //generate children of board
+                int minValue = Integer.MAX_VALUE;
+                                                //find minimum of minmax values of children
+                for (int i = 0; i < children.size(); i++)
+                {
+                    int currentValue = minmax(children.get(i), MAX, depth+1);
+
+                    if (currentValue < minValue)
+                        minValue = currentValue;
+                }
+
+                return minValue;                  //return minimum minmax value  
+            }
         }
-        else                                   //if board is at min level
-        {                     
-             LinkedList<Board> children = generate(board, PLAYER);
-                                               //generate children of board
-             int minValue = Integer.MAX_VALUE;
-                                               //find minimum of minmax values of children
-             for (int i = 0; i < children.size(); i++)
-             {
-                 int currentValue = minmax(children.get(i), MAX, depth+1);
-
-                 if (currentValue < minValue)
-                      minValue = currentValue;
-             }
-
-             return minValue;                  //return minimum minmax value  
-        }
-    }
     }
 
     private LinkedList<Board> generate(Board board, char symbol){
@@ -172,41 +175,25 @@ public class Tictactoe{
         return full(board) && !computerWin(board) && !playerWin(board);
     }
 
-    private boolean check(Board board, char symbol){
-        for(int i = 0; i < size; i++)
-            if(checkRow(board, i, symbol)) return true;
-
-        for(int i = 0; i< size; i++)
-            if(checkcolumn(board, i, symbol)) return true;
-
-        if(checkLeftDiagonal(board, symbol)) return true; 
-
-        if(checkRightDiagonal(board, symbol)) return true;
+    private boolean check(Board board, char symbol){ //checks to see who has more points
+        if(full(board) && board.COMPUTER_points > board.PLAYER_points) return true;
+        if(full(board) && board.PLAYER_points > board.COMPUTER_points) return true;
 
         return false;
     }
 
+    //MODIFY THE CHECKS FOR FINDING CONSECUTIVE SYMBOLS
     private boolean checkRow(Board board, int i, char symbol){
         for(int j = 0; j < size; j++)
-            if(board.arry[i][j] != symbol) return false;
+            if(board.arry[i][j] == symbol) 
+                return false;
         return true;
     }
 
     private boolean checkcolumn(Board board, int i, char symbol){
         for(int j = 0; j < size; j++)
-            if(board.array[j][i] != symbol) return false;
-        return true;
-    }
-
-    private boolean checkLeftDiagonal(Board board, char symbol){
-        for (int i = 0; i< size; i++)
-            if(board.array[i][i] != symbol) return false;
-        return true;
-    }
-
-    private boolean checkRightDiagonal(Board board, char symbol){
-        for(int i = 0; i < size; i++)
-            if(board.array[i][size-1] != symbol) return false;
+            if(board.array[j][i] != symbol) 
+            return false;
         return true;
     }
 
