@@ -1,4 +1,6 @@
 import java.util.LinkedList;
+import java.io.FileWriter;
+import java.io.BufferedWriter;
 
 public class Problem1 {
 	private class Board {
@@ -15,7 +17,6 @@ public class Problem1 {
 			for (int i = 0; i < size; i++) // copy given array
 				for (int j = 0; j < size; j++)
 					this.array[i][j] = array[i][j];
-
 			this.gvalue = 0; // path cost, heuristic value,
 			this.hvalue = 0; // fvalue are all 0
 			this.fvalue = 0;
@@ -29,11 +30,14 @@ public class Problem1 {
 	private int size; // board size
 	private int evaluationOption;
 	private int heuristicOption;
+	private float executionTime;
 
 	// Constructor of SlidingAstar class
 	public Problem1(char[][] initial, char[][] goal, int eOption, int hOption, int size) {
 		this.size = size; // set size of board
 		this.initial = new Board(initial, size); // create initial board
+		for (int i = 0; i < size; i++)
+				System.out.println(this.initial.array[i]);
 		this.goal = new Board(goal, size); // create goal board
 		this.evaluationOption = eOption;
 		this.heuristicOption = hOption;
@@ -59,7 +63,7 @@ public class Problem1 {
 			if (goal(board)) // if board is goal
 			{
                 endTime = System.currentTimeMillis();
-                float executionTime = endTime - startTime;
+                executionTime = endTime - startTime;
                 System.out.println(executionTime);
 				displayPath(board); // display path to goal
 				return; // stop search
@@ -130,6 +134,11 @@ public class Problem1 {
 	// given direction
 	private Board createChild(Board board, int i, int j, char direction) {
 		Board child = copy(board); // create copy of board
+		char temp;
+		if(child.array[i][j]=='R'){
+			temp = 'R';
+		}else if(child.array[i][j] == 'G')
+
 
 		if (direction == 'N') // swap empty slot to north
 		{

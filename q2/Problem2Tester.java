@@ -6,7 +6,7 @@ import java.io.IOException;;
 public class Problem2Tester{
     private static String tempArrayLine ="";
     protected static char [][] initial;
-    private static int boardSize=0;
+    private static int boardSize;
 
     public static void main(String [] args){
         String line, fileInputName = "";
@@ -48,7 +48,7 @@ public class Problem2Tester{
             System.out.println("There was an error.");
         }
 
-        //Problem2 p = new Problem2(initial, boardSize);
+        Problem2 p = new Problem2(initial, boardSize);
         //p.solve();
     }  
     
@@ -66,13 +66,13 @@ public class Problem2Tester{
             
         }
 
-        for(int i=0; i< initial.length; i++){
-            System.out.print("[");
-            for(int j=0; j< initial[i].length; j++)
-                System.out.print(initial[i][j]);
-            System.out.print("]\n");
-        }
-        System.out.println("=======================");
+        // for(int i=0; i< initial.length; i++){
+        //     System.out.print("[");
+        //     for(int j=0; j< initial[i].length; j++)
+        //         System.out.print(initial[i][j]);
+        //     System.out.print("]\n");
+        // }
+        // System.out.println("=======================");
 
         
     }

@@ -1,5 +1,6 @@
 import java.util.LinkedList;
-
+import java.util.Arrays;
+import java.util.Comparator;
 public class Problem2 {
     
     private class Board{
@@ -11,11 +12,12 @@ public class Problem2 {
             this.array = new char[size][size];
   
             for(int i = 0; i < size; i++){
-                for(int j =0; j < size; j++){
+                for(int j = 0; j < size; j++){
                     this.array[i][j] = arr[i][j];
+                   
                 }
             }
-
+            
             this.hvalue = 0;
             this.gvalue = 0;
             this.fvalue = 0;
@@ -30,7 +32,11 @@ public class Problem2 {
     
     public Problem2(char [][] i, int sz){
         this.size = sz;
+        System.out.println(size);
         this.initial = new Board(i, size);
+        //for (int a = 0; a < size; a++)
+		//		System.out.println(this.initial.array[a]);
+        //displayBoard(initial);
         this.goal = createGoal(this.initial);
     }
 
@@ -39,16 +45,45 @@ public class Problem2 {
         Board goal = new Board(board.array, size); // creates a board goal
                                                 // that contains the same values as the initial
                                                 //but can be sorted to create the final goal board.
-                  
+        
+        for(int i=0; i< size; i++){
+            for(int j = 0; j < size; j++){
+                if((int)goal.array[i][j] == 71)
+                    goal.array[i][j] = Character.toLowerCase(goal.array[i][j]);
+            }
+            
+        }
+        char temp = 0;
+        for(int l = 0; l < size; l++){
+            for(int k = 0; k < size; k++){
 
+                for(int i = 0; i < size; i++){
+                    
+                    for(int j = 0; j < size; j++){
+                        if((int)goal.array[l][k] < (int)goal.array[i][j]){
+                            temp = goal.array[l][k];
+                            goal.array[l][k] = goal.array[i][j];
+                            goal.array[i][j] = temp;
+                        }
+                    }
+                }
+            }
+        }
 
+        for(int i=0; i< size; i++){
+            for(int j = 0; j < size; j++){
+                if((int)goal.array[i][j] == 103)
+                    goal.array[i][j] = Character.toUpperCase(goal.array[i][j]);
+                
+            }
+        }
+
+        displayBoard(goal);
+        
         return goal;
     }
 
-    /*
-        NEEDS TO BE WRITTEN
-    */
-    private void solve(){
+    public void solve(){
         
         LinkedList<Board> openList = new LinkedList<Board>();
         LinkedList<Board> closedList = new LinkedList<Board>();
@@ -101,16 +136,18 @@ public class Problem2 {
     */
     private Board createChild(Board board, int i, int j, char direction){
         Board child = copy(board);
+
+       
         return child;
     }
 
     private int mismatch(Board board){
         int value = 0;
 
-        for(int i = 0; i < size; i++){
+        for(int i = 0; i < size; i++)
             for(int j = 0; j < size; j++)
-                if(board.array[i][j] != goal.array[i][j]) value += 1;
-        }
+                if(board.array[i][j] != goal.array[i][j]) 
+                value += 1;
 
         return value;
     }
@@ -143,17 +180,20 @@ public class Problem2 {
         return false;
     }
 
-    private int find(Board board, LinkedList<Board> list){
-        for(int i = 0; i < size; i++)
-            if(identical(board, list.get(i)))
-                return i;
-        return -1;
-    }
+    private int find(Board board, LinkedList<Board> list) {
+		for (int i = 0; i < list.size(); i++) // compare board with each
+			if (identical(board, list.get(i))) // element of list
+				return i;
+
+		return -1;
+	}
 
     private boolean identical(Board q, Board p){
         for(int i = 0; i < size; i++)
             for(int j = 0; j < size; j++)
-                if(p.array[i][j] != q.array[i][j]) return false;
+                if(p.array[i][j] != q.array[i][j]) 
+                return false;
+
         return true;
     }
 
@@ -173,9 +213,10 @@ public class Problem2 {
     }
 
     private void displayBoard(Board board){
+
         for(int i = 0; i < size; i++){
-            for(int j = 0; j < size; i++)
-                System.out.println(board.array[i][j]);
+            for(int j = 0; j < size; j++)
+                System.out.print(board.array[i][j] + " ");
             System.out.println();
         }
         System.out.println();
