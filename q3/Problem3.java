@@ -381,10 +381,10 @@ public class Problem3{
             answer += testColumn(board, i, symbol);
         }
 
-        if(symbol == 'X')
-            answer = computer.calculateScore();
-        else
-            answer = player.calculateScore();
+        // if(symbol == 'X')
+        //     answer = computer.calculateScore();
+        // else
+        //     answer = player.calculateScore();
 
         return answer;
     }
