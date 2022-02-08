@@ -7,13 +7,16 @@ public class Problem3{
     private final char PLAYER = '0';
     private final int MIN = 0;
     private final int MAX = 1;
-    private final int LIMIT = 3;
-    private int COMPUTER_points = 0;
-    private int PLAYER_points = 0;
+    private final int LIMIT = 9;
+
 
     private class Board{
 
         private char [][] array;
+        private int COMPUTER_points = 0;
+        private int PLAYER_points = 0;
+        private int COMPUTER_consecutives = 0;
+        private int PLAYER_consecutives = 0;
 
         private Board(int size){
             array = new char[size][size];
@@ -22,7 +25,12 @@ public class Problem3{
                 for(int j = 0; j < size; j++)
                     array[i][j] = EMPTY;
 
+            COMPUTER_points = 0;
+            COMPUTER_consecutives = 0;
+            PLAYER_points = 0;
+            PLAYER_consecutives = 0;
 
+            
 
         }
     }
@@ -39,95 +47,62 @@ public class Problem3{
         }
 
         private int calculateScore(){
-            //System.out.println(twoConsecutives);
             this.points = 2 * this.twoConsecutives + 3 * this.threeConsecutives;
             return this.points;
         }
-    }
-
-    private class Computer{
-        private int twoConsecutives;
-        private int threeConsecutives;
-        private int points;
-
-        private Computer(){
-            this.twoConsecutives = 0;
-            this.threeConsecutives = 0;
-            this.points = 0;
-        }
-
-        private int calculateScore(){
-            //System.out.println(twoConsecutives);
-            this.points = 2 * this.twoConsecutives + 3 * this.threeConsecutives;
-            return this.points;
+        private int calculateNumberConsecutives(){
+            return this.twoConsecutives + this.threeConsecutives;
         }
     }
 
     private Board board;
     private int size;
-    private Computer computer;
+    private Player computer;
     private Player player; // human player
 
     public Problem3(int sz){
 
         this.size = sz;
         this.board = new Board(size);
-        this.computer = new Computer();
+        this.computer = new Player();
         this.player = new Player();
         displayBoard(board);
     }
 
     public void play(){
-        while (true)                               //computer and player take turns
+        while (!full(board))                               //turns are taken until the board is full
         {
             board = playerMove(board);             //player makes a move
 
-            if (playerWin(board))                  //if player wins then game is over
-            {
-                System.out.println("Player wins");
-                break;
-            }
-
-            if (draw(board))                       //if draw then game is over
-            {
-                System.out.println("Draw");
-                break;
-            }
-
             board = computerMove(board);           //computer makes a move
-
-            if (computerWin(board))                //if computer wins then game is over
-            {                      
-                System.out.println("Computer wins");
-                break;
-            }
-
-            if (draw(board))                       //if draw then game is over
-            {
-                System.out.println("Draw");
-                break;
-            }
         }
+        if (playerWin(board))                  // check to see if player has a higher score
+        {
+            System.out.println("Player wins");
+            
+        }
+        else if (computerWin(board))                  // check to see if computer has a higher score
+        {
+            System.out.println("Computer wins");
+        }
+
+        else if (draw(board))                       // check to see if the scores are then same
+        {
+            System.out.println("Draw");
+        }
+        
     }
 
     private Board playerMove(Board board){
-        System.out.print("Player move: ");         //prompt player
+        System.out.print("Player move: ");         // ask for players more
      
-        Scanner scanner = new Scanner(System.in);  //read player's move
-        int i = scanner.nextInt();
-        int j = scanner.nextInt();
+        Scanner scanner = new Scanner(System.in);  
+        int i = scanner.nextInt();                 // Player enters row location
+        int j = scanner.nextInt();                 // Player enters column location
 
-        board.array[i][j] = PLAYER;                //place player symbol
+        board.array[i][j] = PLAYER;                
 
-        for(int a = 0; a < size; a++){
-            checkRow(board, a, 'X');
-            checkColumn(board, a, 'X');
-            checkRow(board, a, '0');
-            checkColumn(board, a, '0');
-        }
-        System.out.println(player.calculateScore());
-        System.out.println(computer.calculateScore());
-        displayBoard(board);                       //diplay board
+        displayBoard(board);                       //diplay the current game board
 
         return board;
     }
@@ -140,7 +115,7 @@ public class Problem3{
                                                    //find the child with
         for (int i = 0; i < children.size(); i++)  //largest minmax value
         {
-            int currentValue = minmax(children.get(i), MIN, 1);
+            int currentValue = minmax(children.get(i), MIN, 1, Integer.MIN_VALUE, Integer.MAX_VALUE);
             if (currentValue > maxValue)
             {
                 maxIndex = i;
@@ -150,21 +125,15 @@ public class Problem3{
 
         Board result = children.get(maxIndex);     //choose the child as next move
                                               
-        for(int i = 0; i < size; i++){
-            checkRow(board, i, 'X');
-            checkColumn(board, i, 'X');
-            checkRow(board, i, '0');
-            checkColumn(board, i, '0');
-        }
+
         System.out.println("Computer move:"); 
-        System.out.println(player.calculateScore());
-        System.out.println(computer.calculateScore());
+
         displayBoard(result);                      //print next move
 
         return result;               
     }
     
-    private int minmax(Board board, int level, int depth){
+    private int minmax(Board board, int level, int depth, int alpha, int beta){
         if (computerWin(board) || playerWin(board) || draw(board) || depth >= LIMIT)
             return evaluate(board);                //if board is terminal or depth limit is reached
         else                                       //evaluate board
@@ -177,10 +146,16 @@ public class Problem3{
                                                 //find maximum of minmax value of children
                 for (int i = 0; i < children.size(); i++)
                 {                
-                    int currentValue = minmax(children.get(i), MIN, depth+1);
+                    int currentValue = minmax(children.get(i), MIN, depth+1, alpha, beta);
 
                     if (currentValue > maxValue)
                         maxValue = currentValue;
+
+                    if(maxValue >= beta)
+                        return maxValue;
+                    
+                    if(maxValue > alpha)
+                        alpha = maxValue;
                 }
 
                 return maxValue;                  //return maximum minmax value             
@@ -193,12 +168,16 @@ public class Problem3{
                                                 //find minimum of minmax values of children
                 for (int i = 0; i < children.size(); i++)
                 {
-                    int currentValue = minmax(children.get(i), MAX, depth+1);
+                    int currentValue = minmax(children.get(i), MAX, depth+1, alpha, beta);
 
                     if (currentValue < minValue)
                         minValue = currentValue;
+                    if(minValue <= alpha)
+                        return minValue;
+                    if(minValue < beta)
+                        beta = minValue;
                 }
-
+            
                 return minValue;                  //return minimum minmax value  
             }
         }
@@ -212,9 +191,26 @@ public class Problem3{
                 if(board.array[i][j] == EMPTY){
                     Board child = copy(board);
                     child.array[i][j] = symbol;
+
+                    player.twoConsecutives = 0;
+                    player.threeConsecutives = 0;
+                    computer.twoConsecutives = 0;
+                    computer.threeConsecutives = 0;
+
+                    for(int k = 0; k < size; k++){
+                        checkRow(child, k, COMPUTER);
+                        checkColumn(child, k, COMPUTER);
+                        checkRow(child, k, '0');
+                        checkColumn(child, k, '0');
+                    }
+
+                    child.COMPUTER_consecutives = computer.calculateNumberConsecutives();
+                    child.PLAYER_consecutives = player.calculateNumberConsecutives();
+                    child.COMPUTER_points = computer.calculateScore();
+                    child.PLAYER_points = player.calculateScore();
+                    
                     children.addLast(child);
                 }
-            
 
         return children;
     }
@@ -232,87 +228,74 @@ public class Problem3{
     }
 
     private boolean check(Board board, char symbol){ //checks to see who has more points
-        player.twoConsecutives = 0;
-        player.threeConsecutives = 0;
-        computer.twoConsecutives = 0;
-        computer.threeConsecutives = 0;
-        
-        if(full(board) && computer.calculateScore() > player.calculateScore()) return true;
-        if(full(board) && player.calculateScore() > computer.calculateScore()) return true;
-
+        if(full(board) && (board.PLAYER_points - board.COMPUTER_points > 0)){
+            
+            return true;
+        }
+        else if(full(board) && (board.PLAYER_points - board.COMPUTER_points < 0)) {
+            return true;
+        }
         return false;
     }
 
     //MODIFY THE CHECKS FOR FINDING CONSECUTIVE SYMBOLS
     private void checkRow(Board board, int i, char symbol){
+        
         int consecutiveSymbolCount = 0;
         for(int j = 0; j < size; j++){
-            if(board.array[i][j] != symbol) 
-                break;
-            consecutiveSymbolCount++;
-           
-        }
-        if(consecutiveSymbolCount == 2){
-            if(symbol == 'X')
-                computer.twoConsecutives++;
-            else
-                player.twoConsecutives++;
-        }else if(consecutiveSymbolCount == 3){
-            if(symbol == 'X'){
-                computer.twoConsecutives += 2;
-                computer.threeConsecutives++;
+            if(board.array[i][j] != symbol){
+                consecutiveSymbolCount = 0;
             }
-            else{
-                player.twoConsecutives += 2;
-                player.threeConsecutives++;
+            else if(board.array[i][j] == symbol){
+                consecutiveSymbolCount++;
+                
+                if(consecutiveSymbolCount == 2){
+                    if(symbol == COMPUTER)
+                        computer.twoConsecutives += 1;
+                    else
+                        player.twoConsecutives += 1;
+                }else if(consecutiveSymbolCount >= 3){
+                    if(symbol == COMPUTER){
+                        computer.twoConsecutives += 1;
+                        computer.threeConsecutives += 1;
+                    }
+                    else{
+                        player.twoConsecutives += 1;
+                        player.threeConsecutives += 1;
+                    }
+                }
             }
-        }else if(consecutiveSymbolCount > 3){
-            if(symbol == 'X'){
-                computer.twoConsecutives = consecutiveSymbolCount - 1;
-                computer.threeConsecutives = consecutiveSymbolCount - 2;
-            }else{
-                player.twoConsecutives = consecutiveSymbolCount - 1;
-                player.threeConsecutives = consecutiveSymbolCount - 2;
-
-            }
-
         }
     }
 
     private void checkColumn(Board board, int i, char symbol){
         int consecutiveSymbolCount = 0;
-        for(int j = 0; j < size; j++){
-            if(board.array[j][i] != symbol) 
-                break;
-            consecutiveSymbolCount++;
-            System.out.println(consecutiveSymbolCount);
-        }
-        if(consecutiveSymbolCount == 2){
-            if(symbol == 'X')
-                computer.twoConsecutives++;
-            else
-                player.twoConsecutives++;
-        }else if(consecutiveSymbolCount == 3){
-            if(symbol == 'X'){
-                computer.twoConsecutives += 2;
-                computer.threeConsecutives++;
-            }
-            else{
-                player.twoConsecutives += 2;
-                player.threeConsecutives++;
-            }
-        }else if(consecutiveSymbolCount > 3){
-            if(symbol == 'X'){
-                computer.twoConsecutives = consecutiveSymbolCount - 1;
-                computer.threeConsecutives = consecutiveSymbolCount - 2;
-            }else{
-                player.twoConsecutives = consecutiveSymbolCount - 1;
-                player.threeConsecutives = consecutiveSymbolCount - 2;
 
+        for(int j = 0; j < size; j++){
+            if(board.array[j][i] != symbol){
+                consecutiveSymbolCount = 0;
+            }
+            else if(board.array[j][i] == symbol){
+                consecutiveSymbolCount++;
+
+                if(consecutiveSymbolCount == 2){
+                    if(symbol == COMPUTER)
+                        computer.twoConsecutives += 1 ;
+                    else
+                        player.twoConsecutives += 1;
+                }else if(consecutiveSymbolCount >= 3){
+                    if(symbol == COMPUTER){
+                        computer.twoConsecutives += 1;
+                        computer.threeConsecutives += 1;
+                    }
+                    else{
+                        player.twoConsecutives += 1;
+                        player.threeConsecutives += 1;
+                    }
+                }
             }
         }
     }
-
 
     private boolean full(Board board){
         for(int i = 0; i < size; i++)
@@ -334,6 +317,21 @@ public class Problem3{
     }
 
     private void displayBoard(Board board){
+        
+        // player.twoConsecutives = 0;
+        // player.threeConsecutives = 0;
+        // computer.twoConsecutives = 0;
+        // computer.threeConsecutives = 0;
+        // for(int i = 0; i < size; i++){
+        //     checkRow(board, i, COMPUTER);
+        //     checkColumn(board, i, COMPUTER);
+        //     checkRow(board, i, '0');
+        //     checkColumn(board, i, '0');
+        // }
+        
+        System.out.println(board.PLAYER_points);
+        System.out.println(board.COMPUTER_points);
+
         for(int i = 0; i < size; i++){
             for(int j = 0; j < size; j++){
                 if (j < size - 1 )
@@ -342,21 +340,61 @@ public class Problem3{
                 else
                     System.out.print(" " + board.array[i][j]);
             }
-            if(i < size - 1)
-                System.out.println("\n --+---+---+--");
+            if(i < size - 1){
+                System.out.print("\n --+");
+                for(int k = 0; k< size - 3; k++){
+                    System.out.print("---+");
+                }
+                System.out.print("---+--\n");
+            }
         }
         System.out.println();
     }
 
     private int evaluate(Board board)
     {
-        if (computerWin(board))                    //utility is 4 if computer wins
-            return 4;
-        else if (playerWin(board))                 //utility is 1 if player wins
-            return 1;
+        if (computerWin(board) || (board.COMPUTER_consecutives > board.PLAYER_consecutives))                    //utility is 4 if computer wins
+            return 4 * size;
+        else if (playerWin(board) || board.COMPUTER_consecutives < board.PLAYER_consecutives)                 //utility is 1 if player wins
+            return -4 * size;
         else if (draw(board))                      //utility is 3 if draw
-            return 3;
+            return 3 * size;
         else                                       //utility is 2 if depth limit is reached
-            return 2;
+            return ((count(board, COMPUTER) + board.COMPUTER_consecutives) - (count(board, PLAYER) + board.PLAYER_consecutives));
     } 
+
+    public int count(Board board, char symbol){
+        int answer = 0;
+
+        for(int i = 0; i < size; i++){
+            
+            answer += testRow(board, i, symbol);
+        }
+        for(int i = 0; i < size; i++){
+            
+            answer += testRow(board, i, symbol);
+        }
+
+        return answer;
+    }
+
+    public int testRow(Board board, int i, char symbol){
+        int numberEmpty=0;
+
+        for(int j = 0; j < size; j++){
+            if(board.array[j][i] == ' ')
+                numberEmpty++;
+        }
+        return numberEmpty;
+    }
+
+    public int testColumn(Board board, int i, char symbol){
+        int numberEmpty=0;
+
+        for(int j = 0; j < size; j++){
+            if(board.array[j][i] == ' ')
+                numberEmpty++;
+        }
+        return numberEmpty;
+    }
 }

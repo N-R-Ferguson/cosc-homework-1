@@ -25,7 +25,6 @@ public class Problem3Tester {
                 finalString+= line;
             }
             boardSize = Character.getNumericValue(finalString.charAt(finalString.length()-1));
-            System.out.println(boardSize);
         }catch(FileNotFoundException e){
             System.out.println("No file by that name was found.");
         }catch(IOException e){
