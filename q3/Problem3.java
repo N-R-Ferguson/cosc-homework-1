@@ -7,7 +7,7 @@ public class Problem3{
     private final char PLAYER = '0';
     private final int MIN = 0;
     private final int MAX = 1;
-    private final int LIMIT = 9;
+    private final int LIMIT = 5;
 
 
     private class Board{
@@ -216,11 +216,11 @@ public class Problem3{
     }
 
     private boolean computerWin(Board board){
-        return check(board, COMPUTER);
+        return full(board) && (board.PLAYER_points < board.COMPUTER_points);
     }
 
     private boolean playerWin(Board board){
-        return check(board, PLAYER);
+        return full(board) && (board.PLAYER_points > board.COMPUTER_points);
     }
 
     private boolean draw(Board board){
@@ -228,7 +228,7 @@ public class Problem3{
     }
 
     private boolean check(Board board, char symbol){ //checks to see who has more points
-        if(full(board) && (board.PLAYER_points - board.COMPUTER_points > 0)){
+        if(full(board) && (board.PLAYER_points > board.COMPUTER_points)){
             
             return true;
         }
@@ -353,48 +353,103 @@ public class Problem3{
 
     private int evaluate(Board board)
     {
-        if (computerWin(board) || (board.COMPUTER_consecutives > board.PLAYER_consecutives))                    //utility is 4 if computer wins
+        if (computerWin(board) || board.COMPUTER_consecutives > board.PLAYER_consecutives)                    
             return 4 * size;
-        else if (playerWin(board) || board.COMPUTER_consecutives < board.PLAYER_consecutives)                 //utility is 1 if player wins
+        else if (playerWin(board) || board.COMPUTER_consecutives < board.PLAYER_consecutives)                 
             return -4 * size;
-        else if (draw(board))                      //utility is 3 if draw
+        else if (draw(board))                     
             return 3 * size;
-        else                                       //utility is 2 if depth limit is reached
-            return ((count(board, COMPUTER) + board.COMPUTER_consecutives) - (count(board, PLAYER) + board.PLAYER_consecutives));
+        else                                       
+            return count(board, COMPUTER) - count(board, PLAYER);
+
     } 
 
     public int count(Board board, char symbol){
         int answer = 0;
 
+        player.twoConsecutives = 0;
+        player.threeConsecutives = 0;
+        computer.twoConsecutives = 0;
+        computer.threeConsecutives = 0;
+
         for(int i = 0; i < size; i++){
             
             answer += testRow(board, i, symbol);
         }
         for(int i = 0; i < size; i++){
             
-            answer += testRow(board, i, symbol);
+            answer += testColumn(board, i, symbol);
         }
+
+        if(symbol == 'X')
+            answer = computer.calculateScore();
+        else
+            answer = player.calculateScore();
 
         return answer;
     }
 
     public int testRow(Board board, int i, char symbol){
         int numberEmpty=0;
-
+        int numberOfSymbolsInRow = 0;
         for(int j = 0; j < size; j++){
-            if(board.array[j][i] == ' ')
+            if(board.array[j][i] == symbol)
+                numberOfSymbolsInRow++;
+            else if(board.array[j][i] == ' ')
                 numberEmpty++;
+            else{
+                numberOfSymbolsInRow = 0;
+            }
         }
-        return numberEmpty;
+        int answer  = numberEmpty + numberOfSymbolsInRow;
+        if(answer == 2){
+            if(symbol == COMPUTER)
+                computer.twoConsecutives += 1;
+            else
+                player.twoConsecutives += 1;
+        }else if(answer >= 3){
+            if(symbol == COMPUTER){
+                computer.twoConsecutives += 1;
+                computer.threeConsecutives += 1;
+            }
+            else{
+                player.twoConsecutives += 1;
+                player.threeConsecutives += 1;
+            }
+        }
+        return answer;
     }
 
     public int testColumn(Board board, int i, char symbol){
         int numberEmpty=0;
-
+        int numberOfSymbolsInColumn = 0;
         for(int j = 0; j < size; j++){
-            if(board.array[j][i] == ' ')
+            if(board.array[j][i] == symbol)
+                numberOfSymbolsInColumn++;
+            else if(board.array[j][i] == ' ')
                 numberEmpty++;
+            else{
+                numberOfSymbolsInColumn = 0;
+            }
         }
-        return numberEmpty;
+        int answer  = numberEmpty + numberOfSymbolsInColumn;
+
+        if(answer == 2){
+            if(symbol == COMPUTER)
+                computer.twoConsecutives += 1;
+            else
+                player.twoConsecutives += 1;
+        }else if(answer >= 3){
+            if(symbol == COMPUTER){
+                computer.twoConsecutives += 1;
+                computer.threeConsecutives += 1;
+            }
+            else{
+                player.twoConsecutives += 1;
+                player.threeConsecutives += 1;
+            }
+        }
+
+        return answer;
     }
 }
