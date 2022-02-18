@@ -9,27 +9,14 @@ import java.nio.Buffer;
 public class Problem3Tester {
     public static void main(String [] args){
         Scanner input = new Scanner(System.in);
-        String inputFilename = "", outputFilename = "", line = "", finalString="";
+        String outputFilename = "";
         int boardSize = 0;
 
-        System.out.println("Enter the name of the file you would like to read in: ");
-        inputFilename = input.nextLine();
+        System.out.println("Enter the board size: ");
+        boardSize = input.nextInt();
 
-        System.out.println("Enter the name fo the file you would like top print the results to: ");
-        outputFilename = input.nextLine();
-
-        try{
-            BufferedReader reader = new BufferedReader(new FileReader(inputFilename));
-
-            while((line = reader.readLine()) != null){
-                finalString+= line;
-            }
-            boardSize = Character.getNumericValue(finalString.charAt(finalString.length()-1));
-        }catch(FileNotFoundException e){
-            System.out.println("No file by that name was found.");
-        }catch(IOException e){
-            System.out.println("And error occured" + e);
-        }
+        //System.out.println("Enter the name fo the file you would like top print the results to: ");
+        //outputFilename = input.nextLine();
 
         Problem3 p = new Problem3(boardSize);
         p.play();

@@ -318,20 +318,9 @@ public class Problem3{
 
     private void displayBoard(Board board){
         
-        // player.twoConsecutives = 0;
-        // player.threeConsecutives = 0;
-        // computer.twoConsecutives = 0;
-        // computer.threeConsecutives = 0;
-        // for(int i = 0; i < size; i++){
-        //     checkRow(board, i, COMPUTER);
-        //     checkColumn(board, i, COMPUTER);
-        //     checkRow(board, i, '0');
-        //     checkColumn(board, i, '0');
-        // }
-        
         System.out.println(board.PLAYER_points);
         System.out.println(board.COMPUTER_points);
-
+        
         for(int i = 0; i < size; i++){
             for(int j = 0; j < size; j++){
                 if (j < size - 1 )
@@ -353,12 +342,16 @@ public class Problem3{
 
     private int evaluate(Board board)
     {
-        if (computerWin(board) || board.COMPUTER_consecutives > board.PLAYER_consecutives)                    
+        if (computerWin(board))
             return 4 * size;
-        else if (playerWin(board) || board.COMPUTER_consecutives < board.PLAYER_consecutives)                 
+        else if (board.COMPUTER_consecutives > board.PLAYER_consecutives)                    
+            return 2 * size - 1;
+        else if (playerWin(board))
             return -4 * size;
+        else if (board.COMPUTER_consecutives < board.PLAYER_consecutives)                 
+            return -3 * size + 1;
         else if (draw(board))                     
-            return 3 * size;
+            return -2 * size;
         else                                       
             return count(board, COMPUTER) - count(board, PLAYER);
 
@@ -381,10 +374,10 @@ public class Problem3{
             answer += testColumn(board, i, symbol);
         }
 
-        // if(symbol == 'X')
-        //     answer = computer.calculateScore();
-        // else
-        //     answer = player.calculateScore();
+        if(symbol == 'X')
+            answer = computer.calculateScore();
+        else
+            answer = player.calculateScore();
 
         return answer;
     }
@@ -421,6 +414,7 @@ public class Problem3{
     }
 
     public int testColumn(Board board, int i, char symbol){
+        
         int numberEmpty=0;
         int numberOfSymbolsInColumn = 0;
         for(int j = 0; j < size; j++){
@@ -449,7 +443,6 @@ public class Problem3{
                 player.threeConsecutives += 1;
             }
         }
-
         return answer;
     }
 }
